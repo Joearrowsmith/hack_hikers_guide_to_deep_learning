@@ -73,10 +73,11 @@ assert output_shape == 10, "Output shape is not in the expected format"
 
 cnn_1 = keras.Sequential([
     keras.layers.Conv2D(16, kernel_size=(3, 3),
-                        activation='relu',
+                        activation='relu', padding='Same', 
                         input_shape=input_shape),
     keras.layers.Flatten(),
-    keras.layers.Dense(32, activation="relu"),
+    keras.layers.Dense(64, activation="relu"),
+    keras.layers.Dropout(0.1),
     keras.layers.Dense(output_shape, activation='softmax')
 ])
 
@@ -84,14 +85,15 @@ cnn_1 = keras.Sequential([
 
 cnn_2 = keras.Sequential([
     keras.layers.Conv2D(16, kernel_size=(3, 3),
-                        activation='relu',
+                        activation='relu', padding='Same', 
                         input_shape=input_shape),
     keras.layers.MaxPool2D(),
     keras.layers.Conv2D(32, kernel_size=(3, 3),
-                        activation='relu'),
+                        activation='relu', padding='Same'), 
     keras.layers.MaxPool2D(),
     keras.layers.Flatten(),
-    keras.layers.Dense(32, activation="relu"),
+    keras.layers.Dense(64, activation="relu"),
+    keras.layers.Dropout(0.1),
     keras.layers.Dense(output_shape, activation='softmax')
 ])
 
@@ -99,24 +101,25 @@ cnn_2 = keras.Sequential([
 
 cnn_3 = keras.Sequential([
     keras.layers.Conv2D(16, kernel_size=(3, 3),
-                        activation='relu',
+                        activation='relu', padding='Same', 
                         input_shape=input_shape),
     keras.layers.Dropout(0.1),                    
     keras.layers.Conv2D(32, kernel_size=(3, 3),
-                        activation='relu'),
+                        activation='relu', padding='Same'), 
     keras.layers.MaxPool2D(),
     keras.layers.Dropout(0.1),
     keras.layers.BatchNormalization(),
     keras.layers.Conv2D(32, kernel_size=(3, 3),
-                        activation='relu'),
+                        activation='relu', padding='Same'), 
     keras.layers.Dropout(0.1),
     keras.layers.Conv2D(32, kernel_size=(3, 3),
-                        activation='relu'),
+                        activation='relu', padding='Same'), 
     keras.layers.Dropout(0.1),
     keras.layers.BatchNormalization(),
     keras.layers.MaxPool2D(),
     keras.layers.Flatten(),
-    keras.layers.Dense(128, activation="relu"),
+    keras.layers.Dense(64, activation="relu"),
+    keras.layers.Dropout(0.5),
     keras.layers.Dense(output_shape, activation='softmax')
 ])
 
@@ -125,9 +128,9 @@ cnn_3 = keras.Sequential([
 """ lets store our models in a dict (a list would also be valid) so we can loop through them """ 
 
 models = {
-    "single_cnn" : [cnn_1, 50],
-    "deep_cnn" : [cnn_2, 50],
-    "fancy_cnn" : [cnn_3, 50],
+    "single_cnn" : [cnn_1, 20],
+    "deep_cnn" : [cnn_2, 20],
+    "fancy_cnn" : [cnn_3, 20],
 }
 
 scores = []
@@ -140,7 +143,7 @@ for i in models:
     print("training with epochs: ", e)
 
     model.compile(loss=keras.losses.categorical_crossentropy,
-                  optimizer=keras.optimizers.Adadelta(),
+                  optimizer=keras.optimizers.RMSprop(lr=0.001, rho=0.9, epsilon=1e-08, decay=0.0),
                   metrics=['accuracy'])
 
     hist = model.fit(x_train, y_train,
@@ -159,7 +162,7 @@ print("-------------------------------")
 for i in scores:
     print(f"{i[1]}: {i[2]*100:.1f}%")
     plt.plot(i[0].history['accuracy'], label=f'{i[1]} train acc')
-    plt.plot(i[0].history['val_accuracy'], label=f'{i[1]} val acc')
+    plt.plot(i[0].history['val_accuracy'], '--', label=f'{i[1]} val acc')
 
 plt.legend()
 plt.grid(True)

@@ -184,7 +184,7 @@ for i in models:
     model = models[i]
 
     model.compile(loss=keras.losses.categorical_crossentropy,
-                  optimizer=keras.optimizers.Adam(lr=0.0001),
+                  optimizer=keras.optimizers.RMSprop(lr=0.001, rho=0.9, epsilon=1e-08, decay=0.0),
                   metrics=['accuracy'])
 
     hist = model.fit(x_train, y_train,
@@ -203,7 +203,7 @@ print("-------------------------------")
 for i in scores:
     print(f"{i[1]}: {i[2]*100:.1f}%")
     plt.plot(i[0].history['accuracy'], label=f'{i[1]} train acc')
-    plt.plot(i[0].history['val_accuracy'], label=f'{i[1]} val acc')
+    plt.plot(i[0].history['val_accuracy'], '--', label=f'{i[1]} val acc')
 
 plt.legend()
 plt.show()
