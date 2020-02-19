@@ -1,6 +1,5 @@
 import tensorflow as tf
 from tensorflow import keras
-from tensorflow.keras.applications import ResNet50
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -23,27 +22,14 @@ print("data type: ", type(x_train))
 Preprocessing
 """
 
-
-def pad_with(vector, pad_width, iaxis):
-    pad_value = kwargs.get('padder', 0)
-    vector[:pad_width[0]] = pad_value
-    vector[-pad_width[1]:] = pad_value
-
-
-
 def normalise_train_data(data):
     data = data / 255
     """
     we will be using a cnn so we need to add an additional dimension to our data; this dimension is what you would consider to typically be the colour channel. 
-    The pretrained resnet excepts us to use RGB, so lets convert our image to RGB
+    For grayscale images it is of size 1.
     """
-    shape = data.shape
-    data_out = np.zeros(shape=(shape[0], 32, 32))
-    for idx, img in enumerate(data):
-        img_pad = np.pad(img, pad_width=2, mode='constant', constant_values=0) # pad image with zeros so it becomes (32, 32)
-        data_out[idx, :, :] = img_pad
-    data_out = np.stack((data_out,)*3, axis=-1)
-    return data_out
+    #data = np.reshape(data, (*data.shape, 1))
+    return data
 
 print(x_train.shape, x_test.shape)
 
@@ -78,55 +64,21 @@ output_shape = y_train.shape[1:][0]
 print(input_shape, output_shape)
 assert x_train.shape[1:] == x_val.shape[1:] == x_test.shape[1:], "x data is not in the same formats"
 assert y_train.shape[1:] == y_val.shape[1:] == y_test.shape[1:], "y data is not in the same formats"
-assert x_train.shape[0] == y_train.shape[0], "Different number of elements exist"
-assert x_val.shape[0] == y_val.shape[0], "Different number of elements exist"
-assert x_test.shape[0] == y_test.shape[0], "Different number of elements exist"
-assert input_shape == (32, 32, 3), "Input shape is not in the expected format"
+assert x_train.shape[0] == y_train.shape[0]
+assert input_shape == (28, 28), "Input shape is not in the expected format"
 assert output_shape == 10, "Output shape is not in the expected format"
 
 """ lets try out several different architectures: """
 
-""" resnet model #1 """
+""" cnn model #1 """
 
-pretrained_resnet = ResNet50(input_shape=input_shape, include_top=False, pooling='avg')
-
-for layer in pretrained_resnet.layers[:-6]:
-    layer.trainable = False
-
-for layer in pretrained_resnet.layers:
-    print(layer, layer.trainable)
-
-resnet = keras.Sequential([
-    pretrained_resnet,
+lstm_1 = keras.Sequential([
+    keras.layers.LSTM(128, input_shape=input_shape, activation='relu', return_sequences=True),
+    keras.layers.Dropout(0.2),
+    keras.layers.LSTM(128, activation='relu'),
+    keras.layers.Dropout(0.2),
     keras.layers.Dense(64, activation="relu"),
-    keras.layers.Dropout(0.5),
-    keras.layers.Dense(output_shape, activation='softmax')
-])
-
-
-""" old cnn model #3 """
-
-cnn_3 = keras.Sequential([
-    keras.layers.Conv2D(16, kernel_size=(3, 3),
-                        activation='relu', padding='Same', 
-                        input_shape=input_shape),
-    keras.layers.Dropout(0.1),                    
-    keras.layers.Conv2D(32, kernel_size=(3, 3),
-                        activation='relu', padding='Same'), 
-    keras.layers.MaxPool2D(),
     keras.layers.Dropout(0.1),
-    keras.layers.BatchNormalization(),
-    keras.layers.Conv2D(32, kernel_size=(3, 3),
-                        activation='relu', padding='Same'), 
-    keras.layers.Dropout(0.1),
-    keras.layers.Conv2D(32, kernel_size=(3, 3),
-                        activation='relu', padding='Same'), 
-    keras.layers.Dropout(0.1),
-    keras.layers.BatchNormalization(),
-    keras.layers.MaxPool2D(),
-    keras.layers.Flatten(),
-    keras.layers.Dense(64, activation="relu"),
-    keras.layers.Dropout(0.5),
     keras.layers.Dense(output_shape, activation='softmax')
 ])
 
@@ -134,8 +86,7 @@ cnn_3 = keras.Sequential([
 """ lets store our models in a dict (a list would also be valid) so we can loop through them """ 
 
 models = {
-    "resnet" : [resnet, 3],
-    "cnn3" : [cnn_3, 15],
+    "simple_lstm" : [lstm_1, 20],
 }
 
 scores = []
