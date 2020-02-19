@@ -6,7 +6,6 @@ import matplotlib.pyplot as plt
 
 print(tf.__version__)
 
-
 """
 Load the dataset
 """
@@ -18,13 +17,12 @@ dataset = keras.datasets.mnist # http://yann.lecun.com/exdb/mnist/
 print("data shape: ", x_train.shape, y_train.shape, x_test.shape, y_test.shape)
 print("data type: ", type(x_train))
 
-
 """
 Preprocessing
 """
 
-#plt.imshow(x_train[1])
-#plt.show()
+plt.imshow(x_train[1])
+plt.show()
 
 print("sample of what our data looks like (random row from an image): ", x_train[1, 14, :28])
 print("bounds:", x_train[0].max(), x_train[0].min())
@@ -49,8 +47,8 @@ x_test = normalise_train_data(x_test)
 Lets look at our data again:
 """
 
-#plt.imshow(x_train[1])
-#plt.show()
+plt.imshow(x_train[1])
+plt.show()
 
 print("sample of what our data looks like (random row from an image): ", x_train[1, 14, :28])
 print("bounds:", x_train[0].max(), x_train[0].min())
@@ -68,10 +66,11 @@ print("train num classes: ", num_classes)
 y_train = keras.utils.to_categorical(y_train, num_classes)
 y_test = keras.utils.to_categorical(y_test, num_classes)
 
+
 """
 Lets check we haven't made any mistakes
 """
-
+ 
 assert x_train.max() <= 1, f"x_train max value is larger than expected: {x_train.max()} !<= 1"
 assert x_train.min() >= 0, f"x_train min value is smaller than expected: {x_train.min()} !>= 0"
 assert x_test.max() <= 1, f"x_test max value is larger than expected: {x_test.max()} !<= 1"
@@ -110,7 +109,6 @@ assert x_train.shape[1:] == x_val.shape[1:] == x_test.shape[1:], "x data is not 
 assert y_train.shape[1:] == y_val.shape[1:] == y_test.shape[1:], "x data is not in the same formats"
 assert input_shape == (28, 28), "Input shape is not in the expected format"
 assert output_shape == 10, "Output shape is not in the expected format"
-
 
 """ lets try out several different architectures: """
 
@@ -206,24 +204,12 @@ for i in scores:
     plt.plot(i[0].history['val_accuracy'], '--', label=f'{i[1]} val acc')
 
 plt.legend()
+plt.grid(True)
 plt.show()
 
 """
 
 These models are not good at this problem, why?
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 - answer: lack of spacial information
 """

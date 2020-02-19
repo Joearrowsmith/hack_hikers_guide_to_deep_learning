@@ -7,8 +7,9 @@ Creates a virutal environment called env
 
 Activate env windows: 
 - env/Script/Activate
+
 Activate env mac / linux: 
-- source env/bin/Activate
+- source env/bin/activate
 
 ## 2 - Create a folder for unit tests
 
